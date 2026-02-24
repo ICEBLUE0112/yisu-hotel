@@ -41,6 +41,24 @@ const HomePage: React.FC = () => {
   const [showLocationAlert, setShowLocationAlert] = useState<boolean>(false)
   // 状态管理：定位提醒弹窗内容
   const [locationAlertMessage, setLocationAlertMessage] = useState<string>('')
+  // 状态管理：日期选择
+  const [checkInDate, setCheckInDate] = useState<Date | null>(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today
+  })
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(() => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    return tomorrow
+  })
+
+  // 处理日期变化
+  const handleDateChange = (newCheckInDate: Date | null, newCheckOutDate: Date | null) => {
+    setCheckInDate(newCheckInDate)
+    setCheckOutDate(newCheckOutDate)
+  }
 
   // 处理标签切换
   const handleTabChange = (tab: 'domestic' | 'overseas' | 'hourly' | 'homestay') => {
@@ -218,7 +236,13 @@ const HomePage: React.FC = () => {
 
             {/* 日期时间选择器 */}
             <div className="h-12 border-b border-gray-100 flex items-center justify-center">
-              <DateTimeSelector />
+              <button className="w-full" onClick={() => {}}>
+                <DateTimeSelector
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onDateChange={handleDateChange}
+                />
+              </button>
             </div>
 
             {/* 筛选标签 */}
@@ -338,7 +362,13 @@ const HomePage: React.FC = () => {
 
             {/* 日期时间选择器 */}
             <div className="h-12 border-b border-gray-100 flex items-center justify-center">
-              <DateTimeSelector />
+              <button className="w-full" onClick={() => {}}>
+                <DateTimeSelector
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onDateChange={handleDateChange}
+                />
+              </button>
             </div>
 
             {/* 人数选择 */}
@@ -466,7 +496,14 @@ const HomePage: React.FC = () => {
 
             {/* 钟点房日期选择 */}
             <div className="h-12 border-b border-gray-100 flex items-center">
-              <div className="font-medium">2月18日 今天</div>
+              <div className="font-medium">
+                {checkInDate
+                  ? `${checkInDate.getMonth() + 1}月${checkInDate.getDate()}日`
+                  : '选择日期'}
+                {checkInDate && checkInDate.toDateString() === new Date().toDateString()
+                  ? '今天'
+                  : ''}
+              </div>
             </div>
           </>
         )}
@@ -554,7 +591,13 @@ const HomePage: React.FC = () => {
 
             {/* 日期时间选择器 */}
             <div className="h-12 border-b border-gray-100 flex items-center justify-center">
-              <DateTimeSelector />
+              <button className="w-full" onClick={() => {}}>
+                <DateTimeSelector
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onDateChange={handleDateChange}
+                />
+              </button>
             </div>
 
             {/* 人数选择 */}
