@@ -4,16 +4,17 @@ interface DateTimeSelectorProps {
   checkInDate?: Date | null
   checkOutDate?: Date | null
   onDateChange?: (checkInDate: Date | null, checkOutDate: Date | null) => void
+  mode?: 'summary' | 'full'
+  onOpenFullSelector?: () => void
 }
 
 const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   checkInDate: propsCheckInDate,
   checkOutDate: propsCheckOutDate,
   onDateChange,
+  mode = 'summary',
+  onOpenFullSelector,
 }) => {
-  // 状态管理：是否显示日历选择器
-  const [showCalendar, setShowCalendar] = useState<boolean>(false)
-
   // 使用props中的日期作为默认值，同时允许本地修改
   const [localCheckInDate, setLocalCheckInDate] = useState<Date | null>(() => {
     if (propsCheckInDate) {
@@ -41,47 +42,64 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   const [rowHeight, setRowHeight] = useState<number>(48)
   const [headerHeight, setHeaderHeight] = useState<number>(44)
 
-  // 获取当前应该使用的日期值（优先使用props中的值）
+  // 获取当前应该使用的日期值（优先使用本地状态的值，这样可以确保选择过程的连续性）
   const getCurrentCheckInDate = () => {
-    return propsCheckInDate || localCheckInDate
+    return localCheckInDate
   }
 
   const getCurrentCheckOutDate = () => {
-    return propsCheckOutDate || localCheckOutDate
+    return localCheckOutDate
   }
+
+  // 当props中的日期变化时，更新本地状态
+  useEffect(() => {
+    // 避免在useEffect中直接调用setState，使用setTimeout延迟执行
+    const updateDates = () => {
+      if (propsCheckInDate) {
+        setLocalCheckInDate(propsCheckInDate)
+      }
+      if (propsCheckOutDate) {
+        setLocalCheckOutDate(propsCheckOutDate)
+      }
+    }
+
+    // 使用setTimeout延迟执行，避免级联渲染
+    const timer = setTimeout(updateDates, 0)
+
+    // 清理定时器
+    return () => clearTimeout(timer)
+  }, [propsCheckInDate, propsCheckOutDate])
 
   // 当日历显示时，计算实际的高度
   useEffect(() => {
-    if (showCalendar) {
-      // 等待DOM渲染完成
-      const timer = setTimeout(() => {
-        // 计算月份标题的高度
-        if (monthHeaderRef.current) {
-          setHeaderHeight(monthHeaderRef.current.offsetHeight)
-        }
+    // 等待DOM渲染完成
+    const timer = setTimeout(() => {
+      // 计算月份标题的高度
+      if (monthHeaderRef.current) {
+        setHeaderHeight(monthHeaderRef.current.offsetHeight)
+      }
 
-        // 计算日历行的高度
-        if (calendarContainerRef.current) {
-          // 找到第一个日历行
-          const firstRow = calendarContainerRef.current.querySelector('.grid.grid-cols-7 > div')
-          if (firstRow) {
-            // 计算一行的高度（假设所有行高度相同）
-            const row = firstRow.parentElement
-            if (row) {
-              // 计算网格项的高度
-              const gridItems = row.querySelectorAll('div')
-              if (gridItems.length > 0) {
-                const itemHeight = gridItems[0].offsetHeight
-                setRowHeight(itemHeight)
-              }
+      // 计算日历行的高度
+      if (calendarContainerRef.current) {
+        // 找到第一个日历行
+        const firstRow = calendarContainerRef.current.querySelector('.grid.grid-cols-7 > div')
+        if (firstRow) {
+          // 计算一行的高度（假设所有行高度相同）
+          const row = firstRow.parentElement
+          if (row) {
+            // 计算网格项的高度
+            const gridItems = row.querySelectorAll('div')
+            if (gridItems.length > 0) {
+              const itemHeight = gridItems[0].offsetHeight
+              setRowHeight(itemHeight)
             }
           }
         }
-      }, 100)
+      }
+    }, 100)
 
-      return () => clearTimeout(timer)
-    }
-  }, [showCalendar])
+    return () => clearTimeout(timer)
+  }, [])
 
   // 当用户点击日期时，更新本地状态并通知父组件
   const handleDateClick = (date: Date) => {
@@ -263,6 +281,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
     return current > checkIn && current < checkOut
   }
 
+  // 格式化日期为 MM月DD日 格式
+  const formatDate = (date: Date) => {
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${month}月${day}日`
+  }
+
   // 计算入住天数
   const getNights = () => {
     const currentCheckInDate = getCurrentCheckInDate()
@@ -273,21 +298,14 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
     return diffDays
   }
 
-  // 格式化日期为 MM月DD日 格式
-  const formatDate = (date: Date) => {
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${month}月${day}日`
-  }
-
   // 检查是否已过0点
   const isPastMidnight = new Date().getHours() >= 0 && new Date().getHours() < 6
 
   return (
     <>
-      {/* 默认显示的日期信息 */}
-      {!showCalendar && (
-        <div className="w-full" onClick={() => setShowCalendar(true)}>
+      {/* 摘要模式：显示日期信息，点击后打开完整的日历选择器 */}
+      {mode === 'summary' && (
+        <div className="w-full" onClick={onOpenFullSelector}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="font-medium">
@@ -313,31 +331,9 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
         </div>
       )}
 
-      {/* 日历选择器 */}
-      {showCalendar && (
-        <div className="fixed inset-0 bg-white z-500 flex flex-col">
-          {/* 顶部导航栏 */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
-            <button className="p-2" onClick={() => setShowCalendar(false)}>
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 19l-7-7 7-7"
-                ></path>
-              </svg>
-            </button>
-            <h2 className="text-lg font-medium">选择日期</h2>
-            <div className="w-8"></div> {/* 占位 */}
-          </div>
-
+      {/* 完整模式：显示完整的日历选择器 */}
+      {mode === 'full' && (
+        <div className="w-full">
           {/* 星期标题 */}
           <div className="flex border-b border-gray-100">
             <div className="flex-1 py-2 text-center text-red-500 text-sm">日</div>
@@ -389,7 +385,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                     {Array.from({ length: new Date(year, month, 1).getDay() }).map((_, index) => (
                       <div
                         key={`empty-${year}-${month}-${index}`}
-                        className="flex flex-col items-center justify-center aspect-square border-b border-r border-gray-100 ${index % 7 === 6 ? 'border-r-0' : ''}"
+                        className="flex flex-col items-center justify-center aspect-square border-b border-r border-gray-100"
                       >
                         {/* 空格子 */}
                       </div>
@@ -403,7 +399,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                       return (
                         <div
                           key={`${year}-${month}-${index}`}
-                          className={`flex flex-col items-center justify-center aspect-square border-b border-r border-gray-100 ${(index + new Date(year, month, 1).getDay()) % 7 === 6 ? 'border-r-0' : ''}`}
+                          className={`flex flex-col items-center justify-center aspect-square border-b border-r border-gray-100`}
                         >
                           {/* 日期显示 */}
                           <span
@@ -429,19 +425,6 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 </div>
               )
             })}
-          </div>
-
-          {/* 底部完成按钮 */}
-          <div className="p-4 border-t border-gray-100">
-            <button
-              className={`w-full py-3 font-medium rounded-lg ${getCurrentCheckInDate() && getCurrentCheckOutDate() ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-              onClick={() =>
-                getCurrentCheckInDate() && getCurrentCheckOutDate() && setShowCalendar(false)
-              }
-              disabled={!getCurrentCheckInDate() || !getCurrentCheckOutDate()}
-            >
-              完成({getNights()}晚)
-            </button>
           </div>
         </div>
       )}
