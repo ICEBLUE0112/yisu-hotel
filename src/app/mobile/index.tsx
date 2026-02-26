@@ -6,7 +6,7 @@ import LocationIcon from './components/LocationIcon'
 import DateTimeSelector from './components/DateTimeSelector'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation' // 👉 新增引入
-
+import { Swiper } from 'antd-mobile'
 const CitySelector = dynamic(() => import('./components/CitySelector'), { ssr: false })
 
 interface Hotel {
@@ -25,6 +25,7 @@ const HomePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'domestic' | 'overseas' | 'hourly' | 'homestay'>(
     'domestic',
   )
+
   const [selectedCity, setSelectedCity] = useState<string>('上海')
   const [defaultCities] = useState({
     domestic: '上海',
@@ -52,6 +53,25 @@ const HomePage: React.FC = () => {
   // 👉 搜索框相关的双向绑定状态
   const [inputText, setInputText] = useState<string>('')
   const [appliedKeyword, setAppliedKeyword] = useState<string>('')
+
+  // 👉 新增：定义轮播图广告数据源 (id 请替换为你数据库中真实存在的酒店 id)
+  const adBanners = [
+    {
+      id: 1, // 假设跳转到 ID 为 1 的酒店
+      img: 'https://img95.699pic.com/photo/50048/1095.jpg_wh860.jpg',
+      title: '精选特惠酒店',
+    },
+    {
+      id: 2, // 假设跳转到 ID 为 2 的酒店
+      img: 'https://pic.616pic.com/bg_w1180/00/04/08/G5B2sUeNtc.jpg!/fw/1120',
+      title: '海岛度假首选',
+    },
+    {
+      id: 3, // 假设跳转到 ID 为 3 的酒店
+      img: 'https://img.zcool.cn/community/01d4a859a4ebffa801211d2551a141.jpg@1280w_1l_2o_100sh.jpg',
+      title: '高端商务出行',
+    },
+  ]
 
   // 当筛选条件、城市或【搜索词】改变时，重置分页和列表
   useEffect(() => {
@@ -139,15 +159,25 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 轮播图 */}
+      {/* 真实的自动轮播图 - 带广告跳转 */}
       <div className="relative h-48 bg-gray-200 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <img
-            src="https://img95.699pic.com/photo/50048/1095.jpg_wh860.jpg"
-            alt="酒店轮播图"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <Swiper autoplay loop>
+          {adBanners.map((banner, index) => (
+            <Swiper.Item key={index}>
+              {/* 👉 新增：绑定 onClick 跳转事件，并加上 cursor-pointer 提示可点击 */}
+              <div
+                className="w-full h-48 relative cursor-pointer active:opacity-90 transition-opacity"
+                onClick={() => router.push(`/mobile/hotel/${banner.id}`)}
+              >
+                <img src={banner.img} alt={banner.title} className="w-full h-full object-cover" />
+                {/* 可选：加一个半透明的广告小标题，让它看起来更像真实的推广位 */}
+                <div className="absolute bottom-6 right-0 bg-black bg-opacity-50 text-white text-xs px-3 py-1 rounded-l-full backdrop-blur-sm">
+                  {banner.title}
+                </div>
+              </div>
+            </Swiper.Item>
+          ))}
+        </Swiper>
       </div>
 
       <div className="px-4 py-3">
@@ -232,10 +262,15 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="py-2">
-          {/* 👉 查询按钮绑定了 onClick 事件 */}
+          {/* 👉 查询按钮点击后，携带参数跳转到真正的列表页 */}
           <button
             className="w-full py-3 rounded-full font-medium text-lg bg-blue-600 text-white shadow-md active:bg-blue-700 transition-colors"
-            onClick={() => setAppliedKeyword(inputText)}
+            onClick={() => {
+              const queryCity = positionText === '我的位置' ? selectedCity : positionText
+              router.push(
+                `/mobile/list?city=${encodeURIComponent(queryCity)}&keyword=${encodeURIComponent(inputText)}`,
+              )
+            }}
           >
             查询
           </button>
