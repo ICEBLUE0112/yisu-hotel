@@ -54,6 +54,7 @@ const HotelListPage: React.FC = () => {
     const roomCountParam = urlParams.get('roomCount')
     const adultCountParam = urlParams.get('adultCount')
     const childCountParam = urlParams.get('childCount')
+    const searchParam = urlParams.get('search')
 
     // 从localStorage中获取信息
     const storedCity = localStorage.getItem('selectedCity')
@@ -100,6 +101,10 @@ const HotelListPage: React.FC = () => {
     }
     if (childCountParam) {
       setChildCount(parseInt(childCountParam))
+    }
+    // 更新搜索关键词
+    if (searchParam) {
+      setSearchKeyword(searchParam)
     }
   }, [])
 

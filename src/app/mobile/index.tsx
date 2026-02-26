@@ -60,6 +60,8 @@ const HomePage: React.FC = () => {
   // 状态管理：日期选择
   const [checkInDate, setCheckInDate] = useState<Date | null>(null)
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null)
+  // 状态管理：搜索框内容
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // 在客户端渲染时获取日期信息
   useEffect(() => {
@@ -583,6 +585,8 @@ const HomePage: React.FC = () => {
                   type="text"
                   placeholder="位置/品牌/酒店"
                   className="w-full px-3 py-2 bg-gray-100 rounded text-sm border-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -719,6 +723,8 @@ const HomePage: React.FC = () => {
                   type="text"
                   placeholder="位置/品牌/酒店"
                   className="w-full px-3 py-2 bg-gray-100 rounded text-sm border-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -875,6 +881,8 @@ const HomePage: React.FC = () => {
                   type="text"
                   placeholder="位置/品牌/酒店"
                   className="w-full px-3 py-2 bg-gray-100 rounded text-sm border-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -1007,6 +1015,8 @@ const HomePage: React.FC = () => {
                   type="text"
                   placeholder="关键词/位置"
                   className="w-full px-3 py-2 bg-gray-100 rounded text-sm border-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -1085,6 +1095,10 @@ const HomePage: React.FC = () => {
               params.append('roomCount', roomCount.toString())
               params.append('adultCount', adultCount.toString())
               params.append('childCount', childCount.toString())
+              // 添加搜索框内容参数
+              if (searchQuery) {
+                params.append('search', searchQuery)
+              }
               // 跳转到酒店列表页面
               setTimeout(() => {
                 window.location.href = `/mobile/hotel-list?${params.toString()}`
