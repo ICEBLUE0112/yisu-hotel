@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div style={{ height: '100vh', overflow: 'hidden' }}>
       <ProLayout
         title="易宿管理后台"
-        logo="https://github.githubassets.com/images/modules/logos_page/Octocat.png"
+        logo="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg"
         layout="mix"
         location={{ pathname }}
         // 顶部头像配置

@@ -171,11 +171,21 @@ export default function AdminHotelListPage() {
         request={async (params) => {
           const res = await fetch('/api/admin/hotel')
           const result = await res.json()
-          // 前端做一下简单的状态筛选过滤（如果用户用了表头的筛选）
+
           let filteredData = result.data || []
+
+          // 1. 筛选审核状态 (精确匹配)
           if (params.status) {
             filteredData = filteredData.filter((item: HotelItem) => item.status === params.status)
           }
+
+          // 👉 2. 新增：筛选酒店名称 (模糊匹配)
+          if (params.title) {
+            filteredData = filteredData.filter((item: HotelItem) =>
+              item.title.toLowerCase().includes(params.title.toLowerCase()),
+            )
+          }
+
           return {
             data: filteredData,
             success: result.success,

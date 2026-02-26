@@ -89,20 +89,26 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* 👉 新增：必须把 contextHolder 放在组件渲染树中，这样弹窗才能正常挂载并获取上下文 */}
-      {contextHolder}
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">易宿酒店管理平台</h2>
+    <div className="fixed inset-0 w-full h-full bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* 👉 我们在这里完全自定义居中的头部信息 */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
+        {/* 使用本地的地球图标，严格居中并控制大小 */}
+        <img
+          src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg"
+          alt="Yisu Logo"
+          className="h-14 w-14 mb-4"
+        />
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">易宿酒店管理平台</h2>
+        <p className="mt-2 text-center text-sm text-gray-500">
+          致力于提供高效、便捷的酒店预订与管理服务
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 overflow-hidden">
           <LoginForm
-            logo="https://github.githubassets.com/images/modules/logos_page/Octocat.png"
-            title="易宿 (Yisu Hotel)"
-            subTitle="致力于提供高效、便捷的酒店预订与管理服务"
+            // 👉 删除了自带的 logo, title, subTitle，使用我们上方自定义的排版
+            contentStyle={{ width: '100%', minWidth: '100%' }}
             submitter={{
               searchConfig: {
                 submitText: loginType === 'login' ? '登录' : '注册',
