@@ -340,7 +340,9 @@ const HomePage: React.FC = () => {
                   <div className="relative w-full h-full">
                     <Image
                       src={
-                        hotel.imageUrl || 'https://img95.699pic.com/photo/50048/1095.jpg_wh860.jpg'
+                        hotel.imageUrl && !hotel.imageUrl.includes('your-image-url.com')
+                          ? hotel.imageUrl
+                          : 'https://img95.699pic.com/photo/50048/1095.jpg_wh860.jpg'
                       }
                       alt={hotel.title}
                       fill
@@ -521,14 +523,28 @@ const HomePage: React.FC = () => {
 
                               // 提取城市名字
                               let cityName = '未知城市'
-                              if (data.regeocode.addressComponent) {
-                                if (data.regeocode.addressComponent.city) {
-                                  cityName = data.regeocode.addressComponent.city
-                                } else if (data.regeocode.addressComponent.province) {
-                                  cityName = data.regeocode.addressComponent.province
+                              // 尝试从formatted_address中提取城市名字
+                              const formattedAddress = data.regeocode.formatted_address
+                              console.log('formatted_address:', formattedAddress)
+
+                              // 简单的城市名字提取逻辑
+                              if (formattedAddress) {
+                                // 匹配省份或城市
+                                const cityMatch = formattedAddress.match(/^([^市]+市|^[^省]+省)/)
+                                if (cityMatch) {
+                                  cityName = cityMatch[0]
+                                } else {
+                                  // 尝试匹配区县
+                                  const districtMatch =
+                                    formattedAddress.match(/([^区]+区|[^县]+县)/)
+                                  if (districtMatch) {
+                                    cityName = districtMatch[0]
+                                  }
                                 }
                               }
+
                               console.log('提取的城市名字:', cityName)
+                              console.log('addressComponent:', data.regeocode.addressComponent)
 
                               // 更新城市选择
                               setSelectedCity(cityName)
@@ -799,14 +815,28 @@ const HomePage: React.FC = () => {
 
                               // 提取城市名字
                               let cityName = '未知城市'
-                              if (data.regeocode.addressComponent) {
-                                if (data.regeocode.addressComponent.city) {
-                                  cityName = data.regeocode.addressComponent.city
-                                } else if (data.regeocode.addressComponent.province) {
-                                  cityName = data.regeocode.addressComponent.province
+                              // 尝试从formatted_address中提取城市名字
+                              const formattedAddress = data.regeocode.formatted_address
+                              console.log('formatted_address:', formattedAddress)
+
+                              // 简单的城市名字提取逻辑
+                              if (formattedAddress) {
+                                // 匹配省份或城市
+                                const cityMatch = formattedAddress.match(/^([^市]+市|^[^省]+省)/)
+                                if (cityMatch) {
+                                  cityName = cityMatch[0]
+                                } else {
+                                  // 尝试匹配区县
+                                  const districtMatch =
+                                    formattedAddress.match(/([^区]+区|[^县]+县)/)
+                                  if (districtMatch) {
+                                    cityName = districtMatch[0]
+                                  }
                                 }
                               }
+
                               console.log('提取的城市名字:', cityName)
+                              console.log('addressComponent:', data.regeocode.addressComponent)
 
                               // 更新城市选择
                               setSelectedCity(cityName)
@@ -917,14 +947,28 @@ const HomePage: React.FC = () => {
 
                               // 提取城市名字
                               let cityName = '未知城市'
-                              if (data.regeocode.addressComponent) {
-                                if (data.regeocode.addressComponent.city) {
-                                  cityName = data.regeocode.addressComponent.city
-                                } else if (data.regeocode.addressComponent.province) {
-                                  cityName = data.regeocode.addressComponent.province
+                              // 尝试从formatted_address中提取城市名字
+                              const formattedAddress = data.regeocode.formatted_address
+                              console.log('formatted_address:', formattedAddress)
+
+                              // 简单的城市名字提取逻辑
+                              if (formattedAddress) {
+                                // 匹配省份或城市
+                                const cityMatch = formattedAddress.match(/^([^市]+市|^[^省]+省)/)
+                                if (cityMatch) {
+                                  cityName = cityMatch[0]
+                                } else {
+                                  // 尝试匹配区县
+                                  const districtMatch =
+                                    formattedAddress.match(/([^区]+区|[^县]+县)/)
+                                  if (districtMatch) {
+                                    cityName = districtMatch[0]
+                                  }
                                 }
                               }
+
                               console.log('提取的城市名字:', cityName)
+                              console.log('addressComponent:', data.regeocode.addressComponent)
 
                               // 更新城市选择
                               setSelectedCity(cityName)
@@ -1002,7 +1046,21 @@ const HomePage: React.FC = () => {
               // 构建查询参数
               const params = new URLSearchParams()
               // 添加城市参数
-              const city = positionText === '我的位置' ? '上海' : selectedCity
+              let city = selectedCity
+              if (positionText === '我的位置') {
+                // 尝试从地址中提取城市名字
+                if (locationAddress) {
+                  const cityMatch = locationAddress.match(/^([^市]+市|^[^省]+省)/)
+                  if (cityMatch) {
+                    city = cityMatch[0]
+                  } else {
+                    const districtMatch = locationAddress.match(/([^区]+区|[^县]+县)/)
+                    if (districtMatch) {
+                      city = districtMatch[0]
+                    }
+                  }
+                }
+              }
               params.append('city', city)
               // 添加入住时间参数
               if (checkInDate) {

@@ -45,18 +45,20 @@ export async function GET(request: NextRequest) {
 
     // 城市过滤
     if (city) {
+      // 处理城市名字，去掉"市"、"县"、"区"等后缀
+      const processedCity = city.replace(/[市区县]/g, '')
+
       // 更灵活的城市过滤逻辑
       const filteredHotels = hotels.filter((hotel) => {
         // 转换为小写进行不区分大小写的比较
         const hotelAddress = hotel.address.toLowerCase()
-        const cityLower = city.toLowerCase()
+        const cityLower = processedCity.toLowerCase()
         // 检查酒店地址是否包含城市名称
         return hotelAddress.includes(cityLower)
       })
 
-      // 如果没有找到匹配的酒店，使用原始的酒店列表
-      // 这样即使数据库中没有该城市的酒店，也能显示其他城市的酒店
-      hotels = filteredHotels.length > 0 ? filteredHotels : hotels
+      // 只使用匹配的酒店列表
+      hotels = filteredHotels
     }
 
     // 标签过滤

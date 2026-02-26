@@ -254,7 +254,10 @@ const HotelListPage: React.FC = () => {
         // 清理酒店数据中的图片URL
         let cleanedHotels = data.data.map((hotel: Hotel) => ({
           ...hotel,
-          imageUrl: 'https://pic4.zhimg.com/v2-b5c43c5a19dde02ad0ce5fb3f407b64f_r.jpg',
+          imageUrl:
+            hotel.imageUrl && !hotel.imageUrl.includes('your-image-url.com')
+              ? hotel.imageUrl
+              : 'https://pic4.zhimg.com/v2-b5c43c5a19dde02ad0ce5fb3f407b64f_r.jpg',
         }))
 
         // 过滤酒店数据，只保留包含所有选中标签的酒店

@@ -20,9 +20,9 @@ interface Hotel {
   description?: string
   facilities?: string[]
   address?: string
-  distance?: string
-  openingYear?: string
-  style?: string
+  openingTime?: string
+  star?: number
+  rooms?: Room[]
   features?: string[]
 }
 
@@ -34,6 +34,7 @@ interface Room {
   capacity: string
   floors: string
   price: number
+  stock: number
   imageUrl: string
   breakfast: boolean
   instantConfirm: boolean
@@ -59,6 +60,7 @@ const HotelDetailPage: React.FC = () => {
     return tomorrow
   })
   const [showDateSelector, setShowDateSelector] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // 从URL参数和localStorage中获取日期信息
   useEffect(() => {
@@ -397,7 +399,6 @@ const HotelDetailPage: React.FC = () => {
             <span className="text-blue-600 font-medium">{hotel.score}</span>
             <span className="text-xs text-gray-500 ml-1">超棒</span>
             <span className="text-xs text-gray-400 ml-2">{hotel.reviewCount}条</span>
-            <span className="text-xs text-gray-400 ml-2">{hotel.distance}</span>
           </div>
           <div className="flex items-center mt-2">
             <svg
@@ -420,6 +421,23 @@ const HotelDetailPage: React.FC = () => {
               ></path>
             </svg>
             <span className="text-xs text-gray-500 ml-1">{hotel.address || hotel.location}</span>
+          </div>
+          {/* 酒店星级和开业时间 */}
+          <div className="flex items-center mt-2">
+            {hotel.star && (
+              <div className="flex items-center mr-4">
+                <span className="text-xs text-gray-500">星级：</span>
+                <span className="text-xs text-gray-700">{hotel.star}星级</span>
+              </div>
+            )}
+            {hotel.openingTime && (
+              <div className="flex items-center">
+                <span className="text-xs text-gray-500">开业时间：</span>
+                <span className="text-xs text-gray-700">
+                  {new Date(hotel.openingTime).toLocaleDateString()}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -486,6 +504,7 @@ const HotelDetailPage: React.FC = () => {
                     <span className="text-red-500 font-medium">¥{room.price}</span>
                     <span className="text-xs text-gray-400 ml-1">起</span>
                   </div>
+                  <div className="text-xs text-gray-500">库存: {room.stock || 1}间</div>
                 </div>
               </div>
             </div>
